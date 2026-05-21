@@ -1,12 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Task_5
+﻿namespace Task_5
 {
-    internal class VisibleState
+    public class VisibleState : IElementState
     {
+        public string HandleRender(LightElementNode element, int indent)
+        {
+            return element.DefaultOuterHTML(indent);
+        }
+
+        public void HandleEvent(LightElementNode element, string eventName)
+        {
+            element.DefaultTriggerEvent(eventName);
+        }
     }
 }
