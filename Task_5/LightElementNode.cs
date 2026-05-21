@@ -4,21 +4,44 @@ namespace Task_5
 {
     public class LightElementNode : LightNode
     {
-        private string tagName;
+        public string TagName;
         private string displayType;
-        private string closingType;
+        public string ClosingType;
+        private IElementState state = new VisibleState();
 
         private List<string> classes = new List<string>();
         private List<LightNode> children = new List<LightNode>();
 
-        private Dictionary<string, List<Action>> events =
-            new Dictionary<string, List<Action>>();
+        private HtmlRenderer renderer = new StandardHtmlRenderer();
+
+        public void SetRenderer(HtmlRenderer newRenderer)
+        {
+            renderer = newRenderer;
+        }
+
+        public string RenderWithTemplate(int indent = 0)
+        {
+            return renderer.Render(this, indent);
+        }
+
+        public List<LightNode> GetChildren()
+        {
+            return children;
+        }
+
+        public void SetState(IElementState newState)
+        {
+            state = newState;
+        }
+
+        private Dictionary<string, List<ICommand>> events =
+        new Dictionary<string, List<ICommand>>();
 
         public LightElementNode(string tagName, string displayType, string closingType)
         {
-            this.tagName = tagName;
+            this.TagName = tagName;
             this.displayType = displayType;
-            this.closingType = closingType;
+            this.ClosingType = closingType;
         }
 
         public void AddClass(string className)
@@ -36,37 +59,54 @@ namespace Task_5
             return children.Count;
         }
 
-        public void AddEventListener(string eventName, Action handler)
+        public void AddEventListener(string eventName, ICommand command)
         {
             if (!events.ContainsKey(eventName))
             {
-                events[eventName] = new List<Action>();
+                events[eventName] = new List<ICommand>();
             }
 
-            events[eventName].Add(handler);
+            events[eventName].Add(command);
         }
 
-        public void TriggerEvent(string eventName)
+        public void DefaultTriggerEvent(string eventName)
         {
             if (events.ContainsKey(eventName))
             {
-                foreach (var handler in events[eventName])
-                {
-                    handler();
-                }
+                    foreach (var command in events[eventName])
+                    {
+                        command.Execute();
+                    }
             }
             else
             {
-                Console.WriteLine("Event not found: " + eventName);
-            }
-        }
 
-        private string GetClasses()
+            }
+
+        }
+        public void TriggerEvent(string eventName)
+        {
+            state.HandleEvent(this, eventName);
+        }
+    
+
+
+        public string GetClasses()
         {
             if (classes.Count == 0)
                 return "";
 
             return " class=\"" + string.Join(" ", classes) + "\"";
+        }
+
+        public override void Accept(ILightNodeVisitor visitor)
+        {
+            visitor.VisitElement(this);
+
+            foreach (var child in children)
+            {
+                child.Accept(visitor);
+            }
         }
 
         public override string InnerHTML()
@@ -83,16 +123,21 @@ namespace Task_5
 
         public override string OuterHTML(int indent = 0)
         {
+            return state.HandleRender(this, indent);
+        }
+
+        public string DefaultOuterHTML(int indent = 0)
+        {
             string space = new string(' ', indent);
 
-            if (closingType == "single")
+            if (ClosingType == "single")
             {
-                return space + "<" + tagName + GetClasses() + "/>";
+                return space + "<" + TagName + GetClasses() + "/>";
             }
 
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(space + "<" + tagName + GetClasses() + ">");
+            sb.AppendLine(space + "<" + TagName + GetClasses() + ">");
 
             foreach (var child in children)
             {
@@ -106,7 +151,7 @@ namespace Task_5
                 }
             }
 
-            sb.Append(space + "</" + tagName + ">");
+            sb.Append(space + "</" + TagName + ">");
 
             return sb.ToString();
         }

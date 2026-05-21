@@ -1,12 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Windows.Input;
 
 namespace Task_5
 {
-    internal class _‎ClickCommand
+    namespace Task_5
     {
+        public class ClickCommand : ICommand
+        {
+            public void Execute()
+            {
+                Console.WriteLine("Button clicked!");
+            }
+        }
+
+        public class SecondClickCommand : ICommand
+        {
+            public void Execute()
+            {
+                Console.WriteLine("Second click handler!");
+            }
+        }
+
+        public class MouseOverCommand : ICommand
+        {
+            public void Execute()
+            {
+                Console.WriteLine("Mouse over button!");
+            }
+        }
     }
 }

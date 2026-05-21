@@ -1,41 +1,81 @@
-﻿namespace Task_5
+﻿using Task_5.Task_5;
+
+namespace Task_5
 {
     internal class Program
     {
         static void Main()
         {
-            LightElementNode button =
-                new LightElementNode("button", "inline", "paired");
+            var root = new LightElementNode("div", "block", "paired");
 
-            button.AddClass("btn");
-            button.AddChild(new LightTextNode("Press me"));
+            var button = new LightElementNode("button", "inline", "paired");
+            button.AddChild(new LightTextNode("Click me"));
 
-            button.AddEventListener("click", () =>
-            {
-                Console.WriteLine("Button clicked!");
-            });
+            button.AddEventListener("click", new ClickCommand());
+            button.AddEventListener("click", new SecondClickCommand());
 
-            button.AddEventListener("click", () =>
-            {
-                Console.WriteLine("Second click handler!");
-            });
+            var span = new LightElementNode("span", "inline", "paired");
+            span.AddChild(new LightTextNode("Hello"));
 
-            button.AddEventListener("mouseover", () =>
-            {
-                Console.WriteLine("Mouse over button!");
-            });
+            root.AddChild(button);
+            root.AddChild(span);
 
             Console.WriteLine("HTML:");
-            Console.WriteLine(button.OuterHTML());
+            Console.WriteLine(root.OuterHTML());
 
             Console.WriteLine("\nTrigger click:");
             button.TriggerEvent("click");
 
-            Console.WriteLine("\nTrigger mouseover:");
-            button.TriggerEvent("mouseover");
+            Console.WriteLine("\n=== DFS ===");
+            ILightIterator dfs = new DepthFirstIterator(root);
 
-            Console.WriteLine("\nTrigger keydown:");
-            button.TriggerEvent("keydown");
+            while (dfs.HasNext())
+            {
+                Console.WriteLine(dfs.Next().GetType().Name);
+            }
+
+            Console.WriteLine("\n=== BFS ===");
+            ILightIterator bfs = new BreadthFirstIterator(root);
+
+            while (bfs.HasNext())
+            {
+                Console.WriteLine(bfs.Next().GetType().Name);
+            }
+
+            Console.WriteLine("\n--- STATE DEMO ---");
+
+            button.SetState(new HiddenState());
+            Console.WriteLine("Hidden button:");
+            Console.WriteLine(root.OuterHTML());
+
+            button.SetState(new DisabledState());
+            Console.WriteLine("\nDisabled button click:");
+            button.TriggerEvent("click");
+
+            button.SetState(new VisibleState());
+            Console.WriteLine("\nVisible button:");
+            Console.WriteLine(root.OuterHTML());
+
+            Console.WriteLine("\n--- TEMPLATE METHOD DEMO ---");
+
+            var customRenderer = new StandardHtmlRenderer();
+            root.SetRenderer(customRenderer);
+
+            Console.WriteLine(root.RenderWithTemplate());
+
+            Console.WriteLine("\n--- VISITOR DEMO ---");
+
+            var counter = new CountVisitor();
+            root.Accept(counter);
+
+            Console.WriteLine($"Elements: {counter.ElementCount}");
+            Console.WriteLine($"Text nodes: {counter.TextCount}");
+
+            var textCollector = new TextCollectorVisitor();
+            root.Accept(textCollector);
+
+            Console.WriteLine("Collected text:");
+            Console.WriteLine(textCollector.Text);
         }
     }
 }

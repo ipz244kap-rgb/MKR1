@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Task_5
+﻿namespace Task_5
 {
-    internal class IElementState
+    public interface IElementState
     {
+        string HandleRender(LightElementNode element, int indent);
+        void HandleEvent(LightElementNode element, string eventName);
     }
 }

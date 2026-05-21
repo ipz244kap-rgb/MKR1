@@ -1,12 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Task_5
+﻿namespace Task_5
 {
-    internal class DisabledState
+    public class DisabledState : IElementState
     {
+        public string HandleRender(LightElementNode element, int indent)
+        {
+            return element.DefaultOuterHTML(indent);
+        }
+
+        public void HandleEvent(LightElementNode element, string eventName)
+        {
+            Console.WriteLine("Element is disabled. Event ignored.");
+        }
     }
 }
